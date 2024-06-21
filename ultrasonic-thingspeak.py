@@ -39,107 +39,51 @@ def connect_wifi(ssid, password):
     print('Network config:', sta_if.ifconfig()) 
 
  
-
 # Read Distance from Ultrasonic Sensor 
-
 def read_distance(trigger_pin, echo_pin): 
-
     trigger = machine.Pin(trigger_pin, machine.Pin.OUT) 
-
     echo = machine.Pin(echo_pin, machine.Pin.IN) 
-
-     
-
+ 
     # Trigger the sensor 
-
     trigger.off() 
-
     time.sleep_us(2) 
-
     trigger.on() 
-
     time.sleep_us(10) 
-
     trigger.off() 
-
-     
 
     # Measure the duration of the echo pulse 
-
     while echo.value() == 0: 
-
         pass 
-
     start = time.ticks_us() 
-
-     
-
     while echo.value() == 1: 
-
         pass 
-
     end = time.ticks_us() 
-
-     
-
     duration = time.ticks_diff(end, start) 
-
-     
-
-    # Calculate the distance in centimeters 
-
-    distance = (duration / 2) / 29.1 
-
-    return distance 
-
  
+    # Calculate the distance in centimeters 
+    distance = (duration / 2) / 29.1 
+    return distance 
 
 # Connect to Wi-Fi 
 connect_wifi(ssid, password) 
-
  
 while True: 
-
     # Read Ultrasonic Sensor Data 
-
     distance = read_distance(trigger_pin, echo_pin) 
-
-     
-
     # Prepare Data for ThingSpeak 
-
     sensor_data = { 
         'field1': distance 
     } 
-
-     
-
     # Post Data to ThingSpeak 
-
     try: 
-
         request = urequests.post( 
-
             'http://api.thingspeak.com/update?api_key=' + THINGSPEAK_WRITE_API_KEY, 
-
             json=sensor_data, 
-
             headers=HTTP_HEADERS 
-
         ) 
-
         request.close() 
-
     except Exception as e: 
-
         print("Failed to send data:", e) 
-
-     
-
     print(sensor_data) 
-
-     
-
     # Wait for the update interval before reading again 
-
     time.sleep_ms(UPDATE_TIME_INTERVAL) 
